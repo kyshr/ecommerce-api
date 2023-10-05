@@ -31,7 +31,7 @@ const UserSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
-        mobile_numbers: [{ type: String }],
+        mobile_number: { type: String, default: "" },
         shipping_addresses: [
             {
                 type: mongoose.Schema.Types.ObjectId,
