@@ -1,88 +1,43 @@
 var express = require("express");
 const passport = require("passport");
 const {
-    getUsers,
     getUser,
-    createUser,
     updateUser,
     deleteUser,
-    loginUser,
+    getAllUsers,
 } = require("../controllers/user.controller");
+const {
+    getUserValidator,
+    updateUserValidator,
+    deleteUserValidator,
+} = require("../validators/user.validator");
 var router = express.Router();
 
 // GET ALL USERS
-router.get(
-    "/",
-    passport.authenticate("jwt", { session: false }),
-    async function (req, res, next) {
-        const users = await getUsers();
-
-        res.status(users.status).json(users.data);
-    }
-);
+router.get("/", passport.authenticate("jwt", { session: false }), getAllUsers);
 
 // GET USER BY ID
 router.get(
-    "/:id",
+    "/:userId",
+    getUserValidator,
     passport.authenticate("jwt", { session: false }),
-    async function (req, res, next) {
-        const id = req.params.id;
-        if (id) {
-            const users = await getUser(id);
-            return res.status(users.status).json(users.data);
-        }
-        res.status(400).json({ data: null, message: "Invalid request" });
-    }
+    getUser
 );
-
-// CREATE NEW USER
-router.post("/", async function (req, res, next) {
-    const data = req.body;
-    const newUser = await createUser(data);
-    res.status(newUser.status).json(newUser.data);
-});
-
-// LOGIN USER
-router.post("/login", async function (req, res, next) {
-    const data = req.body;
-    if (data) {
-        const authenticatedUser = await loginUser(data);
-        return res
-            .status(authenticatedUser.status)
-            .json(authenticatedUser.data);
-    }
-    res.status(400).json({ data: null, message: "Invalid request" });
-});
 
 // UPDATE USER
 router.put(
-    "/:id",
+    "/:userId",
+    updateUserValidator,
     passport.authenticate("jwt", { session: false }),
-    async function (req, res, next) {
-        const id = req.params.id;
-        const data = req.body;
-
-        if (id && data) {
-            const updatedUser = await updateUser(id, data);
-            return res.status(updatedUser.status).json(updatedUser.data);
-        }
-        res.status(400).json({ data: null, message: "Invalid request" });
-    }
+    updateUser
 );
 
 // DELETE USER
 router.delete(
-    "/:id",
+    "/:userId",
+    deleteUserValidator,
     passport.authenticate("jwt", { session: false }),
-    async function (req, res, next) {
-        const id = req.params.id;
-
-        if (id) {
-            const deletedUser = await deleteUser(id);
-            return res.status(deletedUser.status).json(deletedUser.data);
-        }
-        res.status(400).json({ data: null, message: "Invalid request" });
-    }
+    deleteUser
 );
 
 module.exports = router;
