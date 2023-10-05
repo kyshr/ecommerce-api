@@ -1,118 +1,73 @@
 const User = require("../models/user.model");
 const auth = require("../utils/auth");
+const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 
-exports.createUser = async (data) => {
+exports.getUser = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error("Fetch failed.");
+        error.statusCode = 400;
+        error.data = errors.array();
+        return next(error);
+    }
     try {
-        const emailExist = await User.findOne({
-            email: data.email,
-        });
-        if (emailExist) {
-            return {
-                status: 400,
-                data: {
-                    data: null,
-                    message: "Email already exist",
-                },
-            };
-        } else {
-            const newUser = await User.create(data);
-            if (newUser)
-                return {
-                    status: 200,
-                    data: {
-                        _id: newUser._id,
-                        firstname: newUser.firstname,
-                        lastname: newUser.lastname,
-                        email: newUser.email,
-                        created_at: newUser.created_at,
-                        updated_at: newUser.updated_at,
-                        __v: newUser.__v,
-                    },
-                };
-        }
+        const id = req.params.userId;
+        const user = await User.findOne({ _id: id }).select("-password");
+        return res.status(200).json({ data: user });
     } catch (error) {
-        console.log(error);
-        return {
-            status: 400,
-            data: {
-                data: null,
-                message: "Cannot create user",
-            },
-        };
+        return next(error);
     }
 };
 
-exports.updateUser = async (id, data) => {
+exports.getAllUsers = async (req, res, next) => {
     try {
+        const users = await User.find().select("-password");
+        return res.status(200).json({ data: users });
+    } catch (error) {
+        return next(error);
+    }
+};
+
+exports.updateUser = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error("Fetch failed.");
+        error.statusCode = 400;
+        error.data = errors.array();
+        return next(error);
+    }
+    try {
+        const data = req.body;
+        const id = req.params.userId;
         if (data.password) {
             const hashedPassword = await bcrypt.hash(data.password, 10);
             data.password = hashedPassword;
         }
-        const updatedUser = await User.updateOne({ _id: id }, { $set: data });
-        return { status: 200, data: updatedUser };
+        const updatedUser = await User.updateOne(
+            { _id: id },
+            { $set: data }
+        ).select("-password");
+        return res.status(200).json({ data: updatedUser });
     } catch (error) {
-        console.log(error);
-        return { status: 400, data: { acknowledged: false } };
+        return next(error);
     }
 };
 
-exports.deleteUser = async (id) => {
+exports.deleteUser = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error("Fetch failed.");
+        error.statusCode = 400;
+        error.data = errors.array();
+        return next(error);
+    }
     try {
+        const id = req.params.userId;
         const deletedUser = await User.deleteOne({ _id: id });
-        return { status: 200, data: deletedUser };
+        return res.status(200).json({ data: deletedUser });
     } catch (error) {
         console.log(error);
-        return {
-            status: 400,
-            data: {
-                data: null,
-                message: "An error occured",
-            },
-        };
-    }
-};
-
-exports.loginUser = async (data) => {
-    try {
-        const query = { email: data.email };
-        const user = await User.findOne(query);
-        if (user) {
-            const validPassword = await user.isValidPassword(data.password);
-            if (validPassword) {
-                return {
-                    status: 200,
-                    data: {
-                        access_token: auth.createToken({
-                            _id: user._id,
-                        }),
-                    },
-                };
-            }
-            return {
-                status: 400,
-                data: {
-                    access_token: null,
-                    message: "Invalid email or password",
-                },
-            };
-        } else {
-            return {
-                status: 404,
-                data: {
-                    access_token: null,
-                    message: "User not found",
-                },
-            };
-        }
-    } catch (error) {
-        console.log(error);
-        return {
-            status: 400,
-            data: {
-                access_token: null,
-                message: "An error occured",
-            },
-        };
+        return next(error);
     }
 };
