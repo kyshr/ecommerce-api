@@ -17,7 +17,7 @@ dotenv.config({
 
 const indexRouter = require("../routes/index");
 const userRouter = require("../routes/user");
-const todoRouter = require("../routes/todo");
+const authRouter = require("../routes/auth");
 
 const app = express();
 
@@ -49,11 +49,18 @@ app.use(express.static(path.join(__dirname, "../../public")));
 
 app.use("/", indexRouter);
 app.use("/api/users", userRouter);
-app.use("/api/todos", todoRouter);
+app.use("/api/auth", authRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));
+});
+app.use((error, req, res, next) => {
+    console.log(error);
+    const status = error.statusCode || 500;
+    const message = error.message;
+    const data = error.data;
+    res.status(status).json({ message: message, data: data });
 });
 
 // error handler
@@ -64,7 +71,7 @@ app.use(function (err, req, res, next) {
 
     // render the error page
     res.status(err.status || 500);
-    res.render("error");
+    res.json({ message: err.message, data: err.data });
 });
 
 module.exports = app;
