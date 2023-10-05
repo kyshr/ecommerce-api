@@ -23,6 +23,21 @@ const UserSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        email_verified: {
+            type: Boolean,
+            default: false,
+        },
+        is_active: {
+            type: Boolean,
+            default: true,
+        },
+        mobile_numbers: [{ type: String }],
+        shipping_addresses: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "ShippingAddress",
+            },
+        ],
     },
     {
         timestamps: {
