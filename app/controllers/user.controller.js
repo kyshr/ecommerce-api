@@ -32,7 +32,7 @@ exports.getAllUsers = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        const error = new Error("Fetch failed.");
+        const error = new Error("Update failed.");
         error.statusCode = 400;
         error.data = errors.array();
         return next(error);
@@ -57,7 +57,7 @@ exports.updateUser = async (req, res, next) => {
 exports.deleteUser = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        const error = new Error("Fetch failed.");
+        const error = new Error("Delete failed.");
         error.statusCode = 400;
         error.data = errors.array();
         return next(error);
