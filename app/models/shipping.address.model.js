@@ -12,6 +12,7 @@ const ShippingAdressSchema = new mongoose.Schema(
         },
         address_line2: {
             type: String,
+            default: "",
         },
         city: {
             type: String,
