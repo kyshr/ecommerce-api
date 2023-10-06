@@ -9,6 +9,7 @@ const helmet = require("helmet");
 const cors = require("cors");
 const passport = require("passport");
 const mongoose = require("./mongoose");
+const multer = require("multer");
 
 dotenv.config({
     allowEmptyValues: true,
@@ -20,8 +21,36 @@ const userRouter = require("../routes/user");
 const authRouter = require("../routes/auth");
 const shippingAddressRouter = require("../routes/shipping.address");
 const categoryRouter = require("../routes/category");
+const tagRouter = require("../routes/tag");
+const productRouter = require("../routes/product");
 
 const app = express();
+
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "./images");
+    },
+    filename: (req, file, cb) => {
+        cb(
+            null,
+            new Date().toISOString().replace(/:/g, "-") +
+                "-" +
+                file.originalname
+        );
+    },
+});
+
+const fileFilter = (req, file, cb) => {
+    if (
+        file.mimetype === "image/png" ||
+        file.mimetype === "image/jpg" ||
+        file.mimetype === "image/jpeg"
+    ) {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
 
 //mongoose connect
 mongoose.connect();
@@ -43,17 +72,24 @@ require("../config/jwt");
 app.set("views", path.join(__dirname, "../../views"));
 app.set("view engine", "jade");
 
+app.use(
+    multer({ storage: fileStorage, fileFilter: fileFilter }).array("images")
+);
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "../../public")));
+app.use("/images", express.static(path.join(__dirname, "../../images")));
 
 app.use("/", indexRouter);
 app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/shipping-address", shippingAddressRouter);
 app.use("/api/categories", categoryRouter);
+app.use("/api/tags", tagRouter);
+app.use("/api/products", productRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
