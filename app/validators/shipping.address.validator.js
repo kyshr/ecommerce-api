@@ -1,6 +1,4 @@
 const { body, param } = require("express-validator");
-const User = require("../models/user.model");
-const ShippingAddress = require("../models/shipping.address.model");
 
 exports.createShippingAddressValidator = [
     body("user_id").trim().notEmpty(),
@@ -10,6 +8,24 @@ exports.createShippingAddressValidator = [
     body("province").trim().notEmpty(),
     body("country").trim().notEmpty(),
 ];
+
 exports.getShippingAddressValidator = [
-    param("shipping_address_id").trim().notEmpty(),
+    param("shippingAddressId").trim().notEmpty(),
+];
+
+exports.getShippingAddressByUserIdValidator = [
+    param("userId").trim().notEmpty(),
+];
+
+exports.deleteShippingAddressValidator = [
+    param("shippingAddressId").trim().notEmpty(),
+];
+
+exports.updateShippingAddressValidator = [
+    param("shippingAddressId").trim().notEmpty(),
+    body("address_line1").trim().notEmpty().optional(),
+    body("address_line2").trim().notEmpty().optional(),
+    body("city").notEmpty().optional(),
+    body("province").notEmpty().optional(),
+    body("country").notEmpty().optional(),
 ];
