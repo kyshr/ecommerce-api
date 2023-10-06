@@ -30,7 +30,7 @@ router.get(
     getCategory
 );
 
-// GET CATEGORY BY ID
+// CREATE CATEGORY
 router.post(
     "/",
     createCategoryValidator,
