@@ -1,4 +1,3 @@
-const { default: mongoose } = require("mongoose");
 const Cart = require("../models/cart.model");
 const { validationResult } = require("express-validator");
 
@@ -77,7 +76,7 @@ exports.updateCart = async (req, res, next) => {
         const data = req.body;
         const id = req.params.cartId;
 
-        const updatedCart = await Cart.updateOne({ _id: id }, data);
+        const updatedCart = await Cart.updateOne({ _id: id }, { $set: data });
 
         return res
             .status(200)
