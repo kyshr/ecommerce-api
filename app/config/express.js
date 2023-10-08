@@ -23,6 +23,7 @@ const shippingAddressRouter = require("../routes/shipping.address");
 const categoryRouter = require("../routes/category");
 const tagRouter = require("../routes/tag");
 const productRouter = require("../routes/product");
+const cartRouter = require("../routes/cart");
 
 const app = express();
 
@@ -90,6 +91,7 @@ app.use("/api/shipping-address", shippingAddressRouter);
 app.use("/api/categories", categoryRouter);
 app.use("/api/tags", tagRouter);
 app.use("/api/products", productRouter);
+app.use("/api/carts", cartRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
