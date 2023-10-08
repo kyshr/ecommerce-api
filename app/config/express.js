@@ -24,6 +24,7 @@ const categoryRouter = require("../routes/category");
 const tagRouter = require("../routes/tag");
 const productRouter = require("../routes/product");
 const cartRouter = require("../routes/cart");
+const orderRouter = require("../routes/order");
 
 const app = express();
 
@@ -85,13 +86,14 @@ app.use(express.static(path.join(__dirname, "../../public")));
 app.use("/images", express.static(path.join(__dirname, "../../images")));
 
 app.use("/", indexRouter);
-app.use("/api/users", userRouter);
+app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/shipping-address", shippingAddressRouter);
-app.use("/api/categories", categoryRouter);
-app.use("/api/tags", tagRouter);
-app.use("/api/products", productRouter);
-app.use("/api/carts", cartRouter);
+app.use("/api/category", categoryRouter);
+app.use("/api/tag", tagRouter);
+app.use("/api/product", productRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/order", orderRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
