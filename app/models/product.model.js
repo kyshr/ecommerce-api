@@ -60,7 +60,7 @@ const ProductSchema = new mongoose.Schema(
 );
 ProductSchema.pre("updateOne", async function (next) {
     try {
-        let average = 0;
+        let total = 0;
 
         if (this.getUpdate().$push.ratings) {
             const newRating = await Rating.findById(
@@ -70,12 +70,10 @@ ProductSchema.pre("updateOne", async function (next) {
                 product_id: newRating.product_id,
             });
             ratings.forEach((rating) => {
-                average += rating.rating;
+                total += rating.rating;
             });
 
-            average = (average + newRating.rating) / (ratings.length + 1);
-            console.log(average);
-            console.log("rating length", ratings.length);
+            let average = total / ratings.length;
             this.getUpdate().$set.average_rating = average;
         }
 
