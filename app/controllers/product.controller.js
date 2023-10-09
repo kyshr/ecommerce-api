@@ -48,6 +48,8 @@ exports.getProductById = async (req, res, next) => {
         const product = await Product.findOne({ _id: id }).populate([
             "tags",
             "categories",
+            "ratings",
+            "reviews",
         ]);
 
         return res.status(200).json({ data: product });
@@ -92,7 +94,7 @@ exports.getProducts = async (req, res, next) => {
         const products = await Product.find(filter)
             .skip(pageNumber === 1 ? 0 : (pageNumber - 1) * pageLength)
             .limit(pageLength)
-            .populate(["categories", "tags"]);
+            .populate(["categories", "tags", "ratings", "reviews"]);
 
         return res.status(200).json({
             data: products,
