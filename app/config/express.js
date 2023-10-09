@@ -9,6 +9,7 @@ const helmet = require("helmet");
 const cors = require("cors");
 const passport = require("passport");
 const mongoose = require("./mongoose");
+const multer = require("multer");
 
 dotenv.config({
     allowEmptyValues: true,
@@ -17,9 +18,43 @@ dotenv.config({
 
 const indexRouter = require("../routes/index");
 const userRouter = require("../routes/user");
-const todoRouter = require("../routes/todo");
+const authRouter = require("../routes/auth");
+const shippingAddressRouter = require("../routes/shipping.address");
+const categoryRouter = require("../routes/category");
+const tagRouter = require("../routes/tag");
+const productRouter = require("../routes/product");
+const cartRouter = require("../routes/cart");
+const orderRouter = require("../routes/order");
+const ratingRouter = require("../routes/rating");
+const reviewRouter = require("../routes/review");
 
 const app = express();
+
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "./images");
+    },
+    filename: (req, file, cb) => {
+        cb(
+            null,
+            new Date().toISOString().replace(/:/g, "-") +
+                "-" +
+                file.originalname
+        );
+    },
+});
+
+const fileFilter = (req, file, cb) => {
+    if (
+        file.mimetype === "image/png" ||
+        file.mimetype === "image/jpg" ||
+        file.mimetype === "image/jpeg"
+    ) {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
 
 //mongoose connect
 mongoose.connect();
@@ -41,19 +76,39 @@ require("../config/jwt");
 app.set("views", path.join(__dirname, "../../views"));
 app.set("view engine", "jade");
 
+app.use(
+    multer({ storage: fileStorage, fileFilter: fileFilter }).array("images")
+);
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "../../public")));
+app.use("/images", express.static(path.join(__dirname, "../../images")));
 
 app.use("/", indexRouter);
-app.use("/api/users", userRouter);
-app.use("/api/todos", todoRouter);
+app.use("/api/user", userRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/shipping-address", shippingAddressRouter);
+app.use("/api/category", categoryRouter);
+app.use("/api/tag", tagRouter);
+app.use("/api/product", productRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/order", orderRouter);
+app.use("/api/rating", ratingRouter);
+app.use("/api/review", reviewRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));
+});
+app.use((error, req, res, next) => {
+    console.log(error);
+    const status = error.statusCode || 500;
+    const message = error.message;
+    const data = error.data;
+    res.status(status).json({ message: message, data: data });
 });
 
 // error handler
@@ -64,7 +119,7 @@ app.use(function (err, req, res, next) {
 
     // render the error page
     res.status(err.status || 500);
-    res.render("error");
+    res.json({ message: err.message, data: err.data });
 });
 
 module.exports = app;
