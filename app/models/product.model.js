@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Rating = require("./rating.model");
-const Product = require("./product.model");
 
 const ProductSchema = new mongoose.Schema(
     {
@@ -39,6 +38,12 @@ const ProductSchema = new mongoose.Schema(
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "Rating",
+            },
+        ],
+        reviews: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Review",
             },
         ],
         average_rating: {
