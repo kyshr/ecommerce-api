@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const Rating = require("../models/rating.model");
+const Product = require("../models/product.model");
 
 exports.createRating = async (req, res, next) => {
     const errors = validationResult(req);
@@ -13,7 +14,16 @@ exports.createRating = async (req, res, next) => {
     try {
         const data = req.body;
         const newRating = await Rating.create(data);
-
+        if (newRating) {
+            await Product.updateOne(
+                { _id: data.product_id },
+                {
+                    $push: {
+                        ratings: newRating._id,
+                    },
+                }
+            );
+        }
         return res
             .status(200)
             .json({ message: "Rating added.", data: newRating });

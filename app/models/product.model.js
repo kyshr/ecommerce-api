@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const Rating = require("./rating.model");
+const Product = require("./product.model");
 
 const ProductSchema = new mongoose.Schema(
     {
@@ -33,6 +35,15 @@ const ProductSchema = new mongoose.Schema(
                 ref: "Category",
             },
         ],
+        ratings: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Rating",
+            },
+        ],
+        average_rating: {
+            type: Number,
+        },
         tags: [
             {
                 type: mongoose.Schema.Types.ObjectId,
@@ -47,5 +58,31 @@ const ProductSchema = new mongoose.Schema(
         },
     }
 );
+ProductSchema.pre("updateOne", async function (next) {
+    try {
+        let average = 0;
+
+        if (this.getUpdate().$push.ratings) {
+            const newRating = await Rating.findById(
+                this.getUpdate().$push.ratings
+            );
+            const ratings = await Rating.find({
+                product_id: newRating.product_id,
+            });
+            ratings.forEach((rating) => {
+                average += rating.rating;
+            });
+
+            average = (average + newRating.rating) / (ratings.length + 1);
+            console.log(average);
+            console.log("rating length", ratings.length);
+            this.getUpdate().$set.average_rating = average;
+        }
+
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
 module.exports = mongoose.model("Product", ProductSchema);
